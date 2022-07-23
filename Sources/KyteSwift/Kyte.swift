@@ -8,6 +8,10 @@
 import Foundation
 import CryptoKit
 
+struct models {
+    var models:[Codable:AnyClass] = [:]
+}
+
 class Kyte : ObservableObject {
 
     var endpoint:String = ""
@@ -163,18 +167,12 @@ class Kyte : ObservableObject {
                 self.updateSession(sessionToken: self.kyteResponse.response?.session ?? "0", txToken: self.kyteResponse.response?.token ?? "0")
                 
                 if(model == "Session"){
+                    
+                    let kyteSession = KyteSession()
         
-                    do {
-                        let kyteSession = try JSONDecoder().decode(KyteSession.self, from: str.data(using: .utf8)!)
-                        
-                        completion(kyteSession)
-                        //onCompletion(json, error as NSError?)
-
-                    } catch {
-                        print(model)
-                        print(error)
-                    }
-            
+                    let sessionData = kyteSession.jsonDecode(jsonString: str)
+                    
+                    completion(sessionData)
                     
                 } else {
                     

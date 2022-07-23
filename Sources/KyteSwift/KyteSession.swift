@@ -7,29 +7,7 @@
 
 import Foundation
 
-// MARK: - KyteSession
-struct KyteSession: Codable {
-    let responseCode: Int
-    let session, token, uid, sessionPermission: String
-    let txTimestamp, contentType, transaction, engineVersion: String
-    let model, kytePub, kyteNum, kyteIden: String
-    let accountID: String
-    let data: SessionData
-
-    enum CodingKeys: String, CodingKey {
-        case responseCode = "response_code"
-        case session, token, uid, sessionPermission, txTimestamp
-        case contentType = "CONTENT_TYPE"
-        case transaction
-        case engineVersion = "engine_version"
-        case model
-        case kytePub = "kyte_pub"
-        case kyteNum = "kyte_num"
-        case kyteIden = "kyte_iden"
-        case accountID = "account_id"
-        case data
-    }
-}
+class KyteSession: KyteModelData<SessionData> {}
 
 // MARK: - DataClass
 struct SessionData: Codable {
