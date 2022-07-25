@@ -8,10 +8,6 @@
 import Foundation
 import CryptoKit
 
-struct models {
-    var models:[Codable:AnyClass] = [:]
-}
-
 class Kyte : ObservableObject {
 
     var endpoint:String = ""
@@ -30,8 +26,6 @@ class Kyte : ObservableObject {
     
     // kyte models
     var models:[String:Any] = [:]
-    
-    var kyteResponse = KyteModel()
     
     func getIdentityString() -> String {
         // identity string
@@ -154,17 +148,15 @@ class Kyte : ObservableObject {
             print("")
             
             
-            guard let responseCode = try? JSONDecoder().decode(KyteModel.ResponseDefinition.self, from: str.data(using: .utf8)!) else {
+            guard let apiResponse = try? JSONDecoder().decode(KyteResponseDefinition.self, from: str.data(using: .utf8)!) else {
                 print("[Error] Parsing KyteResponse Code")
                 return
             }
             
-            self.kyteResponse.response = responseCode
-            
-            if(self.kyteResponse.response!.responseCode == 200){
+            if(apiResponse.responseCode == 200){
                 
                 // retrieve session and transaction tokens
-                self.updateSession(sessionToken: self.kyteResponse.response?.session ?? "0", txToken: self.kyteResponse.response?.token ?? "0")
+                self.updateSession(sessionToken: apiResponse.session, txToken: apiResponse.token)
                 
                 if(model == "Session"){
                     

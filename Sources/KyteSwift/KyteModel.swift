@@ -7,27 +7,41 @@
 
 import Foundation
 
-class KyteModel: ObservableObject {
-    struct ResponseDefinition:Codable {
-        let responseCode: Int
-        let session, uid, token, sessionPermission: String
-        let txTimestamp, contentType, transaction, engineVersion: String
-        let model, kytePub, kyteNum, kyteIden: String
-        let accountID: String
+class KyteModel<T>: ObservableObject where T : Codable {
+    struct KytePageDefinition:Codable {
+        let pageSize, pageTotal, pageNum, totalCount, totalFiltered: Int
         
         enum CodingKeys: String, CodingKey {
-            case responseCode = "response_code"
-            case session, token, uid, sessionPermission, txTimestamp
-            case contentType = "CONTENT_TYPE"
-            case transaction
-            case engineVersion = "engine_version"
-            case model
-            case kytePub = "kyte_pub"
-            case kyteNum = "kyte_num"
-            case kyteIden = "kyte_iden"
-            case accountID = "account_id"
+            case pageSize = "page_size"
+            case pageTotal = "page_total"
+            case pageNum = "page_num"
+            case totalCount = "total_count"
+            case totalFiltered = "total_filtered"
+        }
+    }
+
+    struct KyteModelDefinition<T>:Codable where T : Codable {
+        var data: T
+        
+        enum CodingKeys: String, CodingKey {
+            case data
         }
     }
     
-    var response:ResponseDefinition?
+    // pagination info
+    // cannot be overriden
+    final var page:KytePageDefinition?
+    
+    // data of type any
+    var data:KyteModelDefinition<T>?
+    
+    func jsonDecode(jsonString:String) -> KyteModelDefinition<T>? {
+        do {
+            self.data = try JSONDecoder().decode(KyteModelDefinition<T>.self, from: jsonString.data(using: .utf8)!)
+            return self.data
+        } catch {
+            print("Unable to parse JSON")
+            return nil
+        }
+    }
 }

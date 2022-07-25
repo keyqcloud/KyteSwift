@@ -7,7 +7,7 @@
 
 import Foundation
 
-class KyteSession: KyteModelData<SessionData> {}
+class KyteSession: KyteModel<SessionData> {}
 
 // MARK: - DataClass
 struct SessionData: Codable {
