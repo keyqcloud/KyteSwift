@@ -7,27 +7,27 @@
 
 import Foundation
 
-class KyteModel<T>: ObservableObject where T : Codable {
-    struct KytePageDefinition:Codable {
-        let pageSize, pageTotal, pageNum, totalCount, totalFiltered: Int
-        
-        enum CodingKeys: String, CodingKey {
-            case pageSize = "page_size"
-            case pageTotal = "page_total"
-            case pageNum = "page_num"
-            case totalCount = "total_count"
-            case totalFiltered = "total_filtered"
-        }
-    }
-
-    struct KyteModelDefinition<T>:Codable where T : Codable {
-        var data: T
-        
-        enum CodingKeys: String, CodingKey {
-            case data
-        }
-    }
+struct KytePageDefinition:Codable {
+    let pageSize, pageTotal, pageNum, totalCount, totalFiltered: Int
     
+    enum CodingKeys: String, CodingKey {
+        case pageSize = "page_size"
+        case pageTotal = "page_total"
+        case pageNum = "page_num"
+        case totalCount = "total_count"
+        case totalFiltered = "total_filtered"
+    }
+}
+
+struct KyteModelDefinition<T>:Codable where T : Codable {
+    var data: T
+    
+    enum CodingKeys: String, CodingKey {
+        case data
+    }
+}
+
+class KyteModel<T>: ObservableObject where T : Codable {
     // pagination info
     // cannot be overriden
     final var page:KytePageDefinition?

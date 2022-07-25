@@ -8,30 +8,43 @@
 import Foundation
 import CryptoKit
 
-class Kyte : ObservableObject {
+enum KyteHTTPMethods: String {
+    case POST
+    case PUT
+    case GET
+    case DELETE
+}
 
-    var endpoint:String = ""
+class Kyte<T>: ObservableObject where T : Codable {
+
+    static var endpoint:String {
+        return Bundle.main.object(forInfoDictionaryKey: "KyteEndpointUrl") as? String ?? ""
+    }
     
     // endpoint keys
-    var publicKey:String = ""
-    var secretKey:String = ""
-    var accountNumber:String = ""
-    var identifier:String = ""
+    static var publicKey:String {
+        return Bundle.main.object(forInfoDictionaryKey: "KytePublicKey") as? String ?? ""
+    }
+    static var secretKey:String {
+        return Bundle.main.object(forInfoDictionaryKey: "KyteSecretKey") as? String ?? ""
+    }
+    static var accountNumber:String {
+        return Bundle.main.object(forInfoDictionaryKey: "KyteAccountNumber") as? String ?? ""
+    }
+    static var identifier:String {
+        return Bundle.main.object(forInfoDictionaryKey: "KyteIdentifier") as? String ?? ""
+    }
     
-    // kyte session store
     var sessionToken:String = "0"
     var transactionToken:String = "0"
     var timestamp:String = ""
     var epoch:String = ""
     
-    // kyte models
-    var models:[String:Any] = [:]
-    
     func getIdentityString() -> String {
         // identity string
         // PUBLIC_KEY%SESSION_TOKEN%DATE_TIME_GMT%ACCOUNT_NUMBER
         // * url encode the base64 encoded string
-        let string = publicKey + "%" + sessionToken + "%" + timestamp + "%" + accountNumber
+        let string = Kyte.publicKey + "%" + self.sessionToken + "%" + self.timestamp + "%" + Kyte.accountNumber
         let utf8str = string.data(using: .utf8)
         if let base64str = utf8str?.base64EncodedString()
         {
@@ -54,18 +67,18 @@ class Kyte : ObservableObject {
         // #3 HMAC algo = SHA256, data = epoch, key = hash#2
         
         // calculate hash #1
-        let key1 = SymmetricKey(data: secretKey.data(using: .utf8)!)
-        let hash1 = HMAC<SHA256>.authenticationCode(for: Data(transactionToken.utf8), using: key1)
+        let key1 = SymmetricKey(data: Kyte.secretKey.data(using: .utf8)!)
+        let hash1 = HMAC<SHA256>.authenticationCode(for: Data(self.transactionToken.utf8), using: key1)
         //let hash1String = Data(hash1).map { String(format: "%02hhx", $0) }.joined()
         //print(hash1String)
         // calculate hash #2
         let key2 = SymmetricKey(data: hash1)
-        let hash2 = HMAC<SHA256>.authenticationCode(for: Data(identifier.utf8), using: key2)
+        let hash2 = HMAC<SHA256>.authenticationCode(for: Data(Kyte.identifier.utf8), using: key2)
         //let hash2String = Data(hash2).map { String(format: "%02hhx", $0) }.joined()
         //print(hash2String)
         // calculate hash #3
         let key3 = SymmetricKey(data: hash2)
-        let signature = HMAC<SHA256>.authenticationCode(for: Data(epoch.utf8), using: key3)
+        let signature = HMAC<SHA256>.authenticationCode(for: Data(self.epoch.utf8), using: key3)
         let signatureString = Data(signature).map { String(format: "%02hhx", $0) }.joined()
         //print(signatureString)
         
@@ -73,18 +86,19 @@ class Kyte : ObservableObject {
     }
     
     // general request function
-    func makeRequest(httpMethod: String, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: Any) -> Void) {
+    func makeRequest(httpMethod: KyteHTTPMethods, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
         
+        var endpointUrl = Kyte.endpoint
         // generate endpointURL
         if (field != nil && value != nil) {
-            self.endpoint += "/" + field! + "/" + value!
+            endpointUrl += "/" + field! + "/" + value!
         }
-        print("[\(httpMethod)]: \(self.endpoint)")
-        let url = URL(string: self.endpoint)!
+        print("[\(httpMethod.rawValue)]: \(endpointUrl)")
+        let url = URL(string: endpointUrl)!
         let session = URLSession.shared
         
         var request = URLRequest(url: url)
-        request.httpMethod = httpMethod
+        request.httpMethod = httpMethod.rawValue
         
         // set timestamp before calculating necessary authentication strings
         let date = Date()
@@ -164,49 +178,28 @@ class Kyte : ObservableObject {
         
                     let sessionData = kyteSession.jsonDecode(jsonString: str)
                     
-                    completion(sessionData)
+                    completion(sessionData as? KyteModelDefinition<T>, nil, apiResponse.session, apiResponse.token)
                     
                 } else {
                     
-                    do {
-                        
-//                        guard let modelClass = NSClassFromString(model) as? KyteModelData? else {
-//                            print("[Error] Model not defined")
-//                            return
-//                        }
-                        
-                        let modelType = self.models[model]
-                        
-                        guard let modelClass = NSClassFromString(model) as? KyteModelData else {
-                            print("[Error] Model not defined")
-                            return
-                        }
-                        
-//                        guard let modelType = self.models[model] else {
-//                            print("[Error] Model type not defined")
-//                            return
-//                        }
-                        
-//                        let modelType = type(of: self.models[model])
-                        
-//                        if (modelClass is KyteModelData.Type) {
-//                            let response = try modelClass.jsonDecode(jsonString: str)
-//                            completion(response)
-//                        }
-                        
-                    } catch {
-                        print(model)
-                        print(error)
+                    let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
+                    let modelClass = NSClassFromString(moduleName+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
+                    
+                    guard let modelData = modelClass.jsonDecode(jsonString: str) else {
+                        print("[Error] Model class not defined")
+                        return
                     }
+                    
+                    completion(modelData, nil, apiResponse.session, apiResponse.token)
                     
                 }
                 
-            }else{
+            } else {
                 
                 do{
                     let kyteError = try JSONDecoder().decode(KyteError.self, from: str.data(using: .utf8)!)
                     print("Error Msg: ", kyteError.error ?? "None Error data");
-                    completion(kyteError)
+                    completion(nil, kyteError, apiResponse.session, apiResponse.token)
                 } catch{
                     print("[Error] Parsing Error data")
                 }
@@ -235,26 +228,18 @@ class Kyte : ObservableObject {
         return dateFormatter.string(from: date as Date)
     }
     
-    func post(model: String, parameters:[String:Any], completion:  @escaping (Any) -> Void) {
-        makeRequest(httpMethod: "POST", model: model, parameters: parameters, completion: completion)
-    }
-    
-    func put(model: String, field: String? = nil, value: String? = nil, parameters:[String:Any], completion: @escaping (Any) -> Void) {
-        makeRequest(httpMethod: "PUT", model: model, field: field, value: value, parameters: parameters, completion: completion)
-    }
-    
-    func get(model: String, field: String? = nil, value: String? = nil, completion: @escaping (Any) -> Void) {
-        makeRequest(httpMethod: "GET", model: model, field: field, value: value, completion: completion)
-    }
-    
-    func delete(model: String, field: String, value: String, completion: @escaping (Any) -> Void) {
-        makeRequest(httpMethod: "DELETE", model: model, field: field, value: value, completion: completion)
-    }
-    
     func updateSession(sessionToken: String, txToken: String){
         self.sessionToken = sessionToken
         self.transactionToken = txToken
         print(" *** updateSession *** ")
+        print(" self.transactionToken : ", self.transactionToken)
+        print(" self.sessionToken: ",  self.sessionToken)
+    }
+    
+    func resetSession(){
+        self.sessionToken = "0"
+        self.transactionToken = "0"
+        print(" *** resetSession *** ")
         print(" self.transactionToken : ", self.transactionToken)
         print(" self.sessionToken: ",  self.sessionToken)
     }
