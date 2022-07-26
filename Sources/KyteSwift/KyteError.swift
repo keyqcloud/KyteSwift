@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct KyteError: Codable {
+public struct KyteError: Codable {
     let responseCode: Int?
     let txTimestamp, contentType, transaction, engineVersion: String?
     let model, kytePub, kyteNum, kyteIden: String?

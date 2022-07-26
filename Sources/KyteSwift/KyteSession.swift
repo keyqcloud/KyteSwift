@@ -7,10 +7,10 @@
 
 import Foundation
 
-class KyteSession: KyteModel<SessionData> {}
+public class KyteSession: KyteModel<SessionData> {}
 
 // MARK: - DataClass
-struct SessionData: Codable {
+public struct SessionData: Codable {
     let uid, expDate, sessionToken, txToken: String
     let createdBy: String?
     let dateCreated: String

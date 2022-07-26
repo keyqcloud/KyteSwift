@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct KyteResponseDefinition:Codable {
+public struct KyteResponseDefinition:Codable {
     let responseCode: Int
     let session, uid, token, sessionPermission: String
     let txTimestamp, contentType, transaction, engineVersion: String

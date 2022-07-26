@@ -8,14 +8,14 @@
 import Foundation
 import CryptoKit
 
-enum KyteHTTPMethods: String {
+public enum KyteHTTPMethods: String {
     case POST
     case PUT
     case GET
     case DELETE
 }
 
-class Kyte<T>: ObservableObject where T : Codable {
+public class Kyte<T>: ObservableObject where T : Codable {
 
     static var endpoint:String {
         return Bundle.main.object(forInfoDictionaryKey: "KyteEndpointUrl") as? String ?? ""

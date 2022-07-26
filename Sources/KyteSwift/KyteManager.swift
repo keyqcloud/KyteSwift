@@ -7,7 +7,7 @@
 
 import Foundation
 
-class KyteManager: ObservableObject {
+public class KyteManager: ObservableObject {
     static let shared: KyteManager = {
         let instance = KyteManager()
         // setup code
