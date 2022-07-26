@@ -88,7 +88,7 @@ public class Kyte<T>: ObservableObject where T : Codable {
     // general request function
     public func makeRequest(httpMethod: KyteHTTPMethods, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
         
-        var endpointUrl = Kyte.endpoint
+        var endpointUrl = Kyte.endpoint + "/" + model
         // generate endpointURL
         if (field != nil && value != nil) {
             endpointUrl += "/" + field! + "/" + value!
