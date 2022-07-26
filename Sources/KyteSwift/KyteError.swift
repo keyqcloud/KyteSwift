@@ -8,12 +8,12 @@
 import Foundation
 
 public struct KyteError: Codable {
-    let responseCode: Int?
-    let txTimestamp, contentType, transaction, engineVersion: String?
-    let model, kytePub, kyteNum, kyteIden: String?
-    let accountID, error: String?
+    public let responseCode: Int?
+    public let txTimestamp, contentType, transaction, engineVersion: String?
+    public let model, kytePub, kyteNum, kyteIden: String?
+    public let accountID, error: String?
 
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
       case responseCode = "response_code"
       case txTimestamp
       case contentType = "CONTENT_TYPE"

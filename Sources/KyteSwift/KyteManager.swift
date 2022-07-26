@@ -43,7 +43,7 @@ public class KyteManager: ObservableObject {
         self.uid = ""
     }
     
-    public func createSession(parameters:[String:Any]?, headers:[String:String]?, completion: ((_ data: KyteModelDefinition<SessionData>?, _ error: KyteError?) -> Void)?) {
+    public func createSession(parameters:[String:Any]?, headers:[String:String]? = nil, completion: ((_ data: KyteModelDefinition<SessionData>?, _ error: KyteError?) -> Void)?) {
         let kyte = Kyte<SessionData>()
         kyte.transactionToken = self.transactionToken
         kyte.sessionToken = self.sessionToken

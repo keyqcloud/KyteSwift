@@ -8,9 +8,9 @@
 import Foundation
 
 public struct KytePageDefinition:Codable {
-    let pageSize, pageTotal, pageNum, totalCount, totalFiltered: Int
+    public let pageSize, pageTotal, pageNum, totalCount, totalFiltered: Int
     
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case pageSize = "page_size"
         case pageTotal = "page_total"
         case pageNum = "page_num"
@@ -20,9 +20,9 @@ public struct KytePageDefinition:Codable {
 }
 
 public struct KyteModelDefinition<T>:Codable where T : Codable {
-    var data: T
+    public var data: T
     
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case data
     }
 }

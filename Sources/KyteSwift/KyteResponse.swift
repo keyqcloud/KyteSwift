@@ -8,13 +8,13 @@
 import Foundation
 
 public struct KyteResponseDefinition:Codable {
-    let responseCode: Int
-    let session, uid, token, sessionPermission: String
-    let txTimestamp, contentType, transaction, engineVersion: String
-    let model, kytePub, kyteNum, kyteIden: String
-    let accountID: String
+    public let responseCode: Int
+    public let session, uid, token, sessionPermission: String
+    public let txTimestamp, contentType, transaction, engineVersion: String
+    public let model, kytePub, kyteNum, kyteIden: String
+    public let accountID: String
     
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case responseCode = "response_code"
         case session, token, uid, sessionPermission, txTimestamp
         case contentType = "CONTENT_TYPE"

@@ -11,13 +11,13 @@ public class KyteSession: KyteModel<SessionData> {}
 
 // MARK: - DataClass
 public struct SessionData: Codable {
-    let uid, expDate, sessionToken, txToken: String
-    let createdBy: String?
-    let dateCreated: String
-    let modifiedBy, dateModified, deletedBy, dateDeleted: String?
-    let deleted, id: String
+    public let uid, expDate, sessionToken, txToken: String
+    public let createdBy: String?
+    public let dateCreated: String
+    public let modifiedBy, dateModified, deletedBy, dateDeleted: String?
+    public let deleted, id: String
 
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case uid
         case expDate = "exp_date"
         case sessionToken, txToken
