@@ -30,12 +30,12 @@ public struct KyteModelDefinition<T>:Codable where T : Codable {
 public class KyteModel<T>: ObservableObject where T : Codable {
     // pagination info
     // cannot be overriden
-    final var page:KytePageDefinition?
+    public final var page:KytePageDefinition?
     
     // data of type any
-    var data:KyteModelDefinition<T>?
+    public var data:KyteModelDefinition<T>?
     
-    func jsonDecode(jsonString:String) -> KyteModelDefinition<T>? {
+    public func jsonDecode(jsonString:String) -> KyteModelDefinition<T>? {
         do {
             self.data = try JSONDecoder().decode(KyteModelDefinition<T>.self, from: jsonString.data(using: .utf8)!)
             return self.data

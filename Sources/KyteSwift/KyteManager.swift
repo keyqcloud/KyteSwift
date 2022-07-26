@@ -8,7 +8,7 @@
 import Foundation
 
 public class KyteManager: ObservableObject {
-    static let shared: KyteManager = {
+    public static let shared: KyteManager = {
         let instance = KyteManager()
         // setup code
         return instance
@@ -21,7 +21,7 @@ public class KyteManager: ObservableObject {
     
     init() {}
     
-    func destroySession(completion: ((_ data: KyteModelDefinition<SessionData>?, _ error: KyteError?) -> Void)?) {
+    public func destroySession(completion: ((_ data: KyteModelDefinition<SessionData>?, _ error: KyteError?) -> Void)?) {
         let kyte = Kyte<SessionData>()
         kyte.transactionToken = self.transactionToken
         kyte.sessionToken = self.sessionToken
@@ -43,7 +43,7 @@ public class KyteManager: ObservableObject {
         self.uid = ""
     }
     
-    func createSession(parameters:[String:Any]?, headers:[String:String]?, completion: ((_ data: KyteModelDefinition<SessionData>?, _ error: KyteError?) -> Void)?) {
+    public func createSession(parameters:[String:Any]?, headers:[String:String]?, completion: ((_ data: KyteModelDefinition<SessionData>?, _ error: KyteError?) -> Void)?) {
         let kyte = Kyte<SessionData>()
         kyte.transactionToken = self.transactionToken
         kyte.sessionToken = self.sessionToken
@@ -64,20 +64,20 @@ public class KyteManager: ObservableObject {
         })
     }
     
-    func post<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, parameters:[String:Any]?, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func post<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, parameters:[String:Any]?, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .POST, model: model, parameters: parameters, headers: headers, completion:{ data, error in completion(data, error)} )
     }
-    func update<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field: String?, value: String?, parameters:[String:Any]?, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func update<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field: String?, value: String?, parameters:[String:Any]?, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .PUT, model: model, field: field, value: value, parameters: parameters, headers: headers, completion:{ data, error in completion(data, error)} )
     }
-    func get<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func get<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .GET, model: model, field: nil, value: nil, headers: headers, completion:{ data, error in completion(data, error)} )
     }
-    func delete<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field: String?, value: String?, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func delete<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field: String?, value: String?, headers:[String:String]?, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .DELETE, model: model, field: field, value: value, headers: headers, completion:{ data, error in completion(data, error)} )
     }
     
-    func request<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field:String? = nil, value:String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func request<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field:String? = nil, value:String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         let kyte = Kyte<T>()
         kyte.transactionToken = self.transactionToken
         kyte.sessionToken = self.sessionToken
@@ -96,7 +96,7 @@ public class KyteManager: ObservableObject {
         })
     }
     
-    func getUserId() -> String {
+    public func getUserId() -> String {
         return self.uid
     }
 }
