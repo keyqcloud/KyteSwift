@@ -7,7 +7,27 @@
 
 import Foundation
 
-public class KyteSession: KyteModel<SessionData> {}
+public class KyteSession: Codable {
+    public var data:KyteSessionDataWrapper?
+    
+    public func jsonDecode(jsonString:String) -> KyteSessionDataWrapper? {
+        do {
+            self.data = try JSONDecoder().decode(KyteSessionDataWrapper.self, from: jsonString.data(using: .utf8)!)
+            return self.data
+        } catch {
+            print("Unable to parse JSON")
+            return nil
+        }
+    }
+}
+
+public struct KyteSessionDataWrapper: Codable {
+    public var data: SessionData
+    
+    public enum CodingKeys: String, CodingKey {
+        case data
+    }
+}
 
 // MARK: - DataClass
 public struct SessionData: Codable {

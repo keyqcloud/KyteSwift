@@ -85,8 +85,7 @@ public class Kyte<T>: ObservableObject where T : Codable {
         return signatureString
     }
     
-    // general request function
-    public func makeRequest(httpMethod: KyteHTTPMethods, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
+    public func prepareRequest(httpMethod: KyteHTTPMethods, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil) -> URLRequest? {
         
         var endpointUrl = Kyte.endpoint + "/" + model
         // generate endpointURL
@@ -95,7 +94,6 @@ public class Kyte<T>: ObservableObject where T : Codable {
         }
         print("[\(httpMethod.rawValue)]: \(endpointUrl)")
         let url = URL(string: endpointUrl)!
-        let session = URLSession.shared
         
         var request = URLRequest(url: url)
         request.httpMethod = httpMethod.rawValue
@@ -124,9 +122,21 @@ public class Kyte<T>: ObservableObject where T : Codable {
                 request.httpBody = try JSONSerialization.data(withJSONObject: parameters!, options: .prettyPrinted)
             } catch let error {
                 print(error.localizedDescription)
-                return
+                return nil
             }
         }
+        
+        return request
+    }
+    
+    // session requests
+    public func sessionRequest(httpMethod: KyteHTTPMethods, model: String = "Session", field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteSessionDataWrapper?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
+        
+        guard let request = self.prepareRequest(httpMethod: httpMethod, model: model, field: field, value: value, parameters: parameters, headers: headers) else {
+            return
+        }
+        
+        let session = URLSession.shared
         
         // make request
         let task = session.dataTask(with: request, completionHandler: { data, response, error in
@@ -172,27 +182,91 @@ public class Kyte<T>: ObservableObject where T : Codable {
                 // retrieve session and transaction tokens
                 self.updateSession(sessionToken: apiResponse.session, txToken: apiResponse.token)
                 
-                if(model == "Session"){
-                    
-                    let kyteSession = KyteSession()
-        
-                    let sessionData = kyteSession.jsonDecode(jsonString: str)
-                    
-                    completion(sessionData as? KyteModelDefinition<T>, nil, apiResponse.session, apiResponse.token)
-                    
-                } else {
-                    
-                    let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
-                    let modelClass = NSClassFromString(moduleName+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
-                    
-                    guard let modelData = modelClass.jsonDecode(jsonString: str) else {
-                        print("[Error] Model class not defined")
-                        return
-                    }
-                    
-                    completion(modelData, nil, apiResponse.session, apiResponse.token)
-                    
+                let kyteSession = KyteSession()
+    
+                let sessionData = kyteSession.jsonDecode(jsonString: str)
+                
+                completion(sessionData, nil, apiResponse.session, apiResponse.token)
+                
+            } else {
+                
+                do{
+                    let kyteError = try JSONDecoder().decode(KyteError.self, from: str.data(using: .utf8)!)
+                    print("Error Msg: ", kyteError.error ?? "None Error data");
+                    completion(nil, kyteError, apiResponse.session, apiResponse.token)
+                } catch{
+                    print("[Error] Parsing Error data")
                 }
+                
+            }
+            
+            return
+            
+        })
+        
+        // perform the task
+        task.resume()
+    }
+    
+    // general request function
+    public func makeRequest(httpMethod: KyteHTTPMethods, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
+        
+        guard let request = self.prepareRequest(httpMethod: httpMethod, model: model, field: field, value: value, parameters: parameters, headers: headers) else {
+            return
+        }
+        
+        let session = URLSession.shared
+        
+        // make request
+        let task = session.dataTask(with: request, completionHandler: { data, response, error in
+           
+        //}) { data, response, error in
+            
+            if let error = error {
+                print("Post Request Error: \(error.localizedDescription)")
+                return
+            }
+            
+            // ensure there is valid response code returned from this HTTP response
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...599).contains(httpResponse.statusCode)
+            else {
+                print("Invalid Response received from the server")
+                return
+            }
+            
+            // ensure there is data returned
+            guard let responseData = data else {
+                print("nil Data received from the server")
+                return
+            }
+            
+            let str = String(decoding: responseData, as: UTF8.self)
+            
+            // output JSON string to console
+            print("")
+            print("//////////////////////////////////////////")
+            print(str)
+            print("//////////////////////////////////////////")
+            print("")
+            
+            
+            guard let apiResponse = try? JSONDecoder().decode(KyteResponseDefinition.self, from: str.data(using: .utf8)!) else {
+                print("[Error] Parsing KyteResponse Code")
+                return
+            }
+            
+            if(apiResponse.responseCode == 200) {
+                    
+                let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
+                let modelClass = NSClassFromString(moduleName+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
+                
+                guard let modelData = modelClass.jsonDecode(jsonString: str) else {
+                    print("[Error] Model class not defined")
+                    return
+                }
+                
+                completion(modelData, nil, apiResponse.session, apiResponse.token)
                 
             } else {
                 
@@ -204,7 +278,6 @@ public class Kyte<T>: ObservableObject where T : Codable {
                     print("[Error] Parsing Error data")
                 }
                     
-                
             }
             
             return

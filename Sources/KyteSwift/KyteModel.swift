@@ -20,14 +20,14 @@ public struct KytePageDefinition:Codable {
 }
 
 public struct KyteModelDefinition<T>:Codable where T : Codable {
-    public var data: T
+    public var data: [T]
     
     public enum CodingKeys: String, CodingKey {
         case data
     }
 }
 
-public class KyteModel<T>: ObservableObject where T : Codable {
+open class KyteModel<T>: ObservableObject where T : Codable {
     // pagination info
     // cannot be overriden
     public final var page:KytePageDefinition?
