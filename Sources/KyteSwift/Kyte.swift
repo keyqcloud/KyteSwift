@@ -182,10 +182,10 @@ public class Kyte<T>: ObservableObject where T : Codable {
                     completion(sessionData, nil, sessionData.data.sessionToken, sessionData.data.txToken)
                 } else {
                     let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
-                    let modelClass = NSClassFromString(moduleName+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
+                    let modelClass = NSClassFromString(moduleName+"."+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
                     
                     guard let modelData = modelClass.jsonDecode(jsonString: str) else {
-                        print("[Error] Model class not defined")
+                        print("[Error] " + moduleName + "." + model + " not defined")
                         return
                     }
                     
