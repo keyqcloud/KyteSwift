@@ -182,10 +182,11 @@ public class Kyte<T>: ObservableObject where T : Codable {
                     completion(sessionData, nil, sessionData.data.sessionToken, sessionData.data.txToken)
                 } else {
                     let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
-                    let modelClass = NSClassFromString(moduleName.replacingOccurrences(of: "-", with: "_")+"."+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
+                    let namespace = moduleName.replacingOccurrences(of: "-", with: "_")
+                    let modelClass = NSClassFromString(namespace+"."+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
                     
                     guard let modelData = modelClass.jsonDecode(jsonString: str) else {
-                        print("[Error] " + moduleName + "." + model + " not defined")
+                        print("[Error] " + namespace + "." + model + " not defined")
                         return
                     }
                     
