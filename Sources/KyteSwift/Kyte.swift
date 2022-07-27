@@ -132,6 +132,8 @@ public class Kyte<T>: ObservableObject where T : Codable {
     // session requests
     public func sessionRequest(httpMethod: KyteHTTPMethods, model: String = "Session", field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteSessionDataWrapper?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
         
+        print("Making session request...\(httpMethod.rawValue)")
+        
         guard let request = self.prepareRequest(httpMethod: httpMethod, model: model, field: field, value: value, parameters: parameters, headers: headers) else {
             return
         }
