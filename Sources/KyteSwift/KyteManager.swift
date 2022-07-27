@@ -26,7 +26,7 @@ public class KyteManager: ObservableObject {
         kyte.transactionToken = self.transactionToken
         kyte.sessionToken = self.sessionToken
         
-        kyte.sessionRequest(httpMethod: .DELETE, completion: { data, error, session, token in
+        kyte.makeRequest(httpMethod: .DELETE, model: "Session", completion: { data, error, session, token in
             self.sessionToken = session
             self.transactionToken = token
             
@@ -34,7 +34,7 @@ public class KyteManager: ObservableObject {
                 completion?(nil, error)
             }
             
-            if let data = data {
+            if let data = data as? KyteSessionDataWrapper {
                 completion?(data, nil)
             }
         })
@@ -48,7 +48,7 @@ public class KyteManager: ObservableObject {
         kyte.transactionToken = self.transactionToken
         kyte.sessionToken = self.sessionToken
         
-        kyte.sessionRequest(httpMethod: .POST, parameters: parameters, headers: headers, completion: { data, error, session, token in
+        kyte.makeRequest(httpMethod: .POST, model: "Session", parameters: parameters, headers: headers, completion: { data, error, session, token in
             self.sessionToken = session
             self.transactionToken = token
             
@@ -56,7 +56,7 @@ public class KyteManager: ObservableObject {
                 completion?(nil, error)
             }
             
-            if let data = data {
+            if let data = data as? KyteSessionDataWrapper {
                 self.uid = data.data.uid
                 
                 completion?(data, nil)
@@ -90,7 +90,7 @@ public class KyteManager: ObservableObject {
                 completion(nil, error)
             }
             
-            if let data = data {
+            if let data = data as? KyteModelDefinition<T> {
                 completion(data, nil)
             }
         })
