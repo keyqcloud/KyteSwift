@@ -169,16 +169,28 @@ public class Kyte<T>: ObservableObject where T : Codable {
             }
             
             if(apiResponse.responseCode == 200) {
+                
+                if (model == "Session") {
+                    let session = KyteSession()
+                    guard let sessionData = session.jsonDecode(jsonString: str) else {
+                        print("[Error] unable to get session data")
+                        return
+                    }
+                    self.sessionToken = sessionData.data.sessionToken
+                    self.transactionToken = sessionData.data.txToken
                     
-                let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
-                let modelClass = NSClassFromString(moduleName+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
-                
-                guard let modelData = modelClass.jsonDecode(jsonString: str) else {
-                    print("[Error] Model class not defined")
-                    return
+                    completion(sessionData, nil, sessionData.data.sessionToken, sessionData.data.txToken)
+                } else {
+                    let moduleName = Bundle.main.infoDictionary!["CFBundleName"] as! String
+                    let modelClass = NSClassFromString(moduleName+model) as AnyObject as? KyteModel<T> ?? KyteModel<T>()
+                    
+                    guard let modelData = modelClass.jsonDecode(jsonString: str) else {
+                        print("[Error] Model class not defined")
+                        return
+                    }
+                    
+                    completion(modelData, nil, apiResponse.session, apiResponse.token)
                 }
-                
-                completion(modelData, nil, apiResponse.session, apiResponse.token)
                 
             } else {
                 
