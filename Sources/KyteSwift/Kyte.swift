@@ -181,6 +181,7 @@ public class Kyte<T>: ObservableObject where T : Codable {
                     
                     completion(sessionData, nil, sessionData.data.sessionToken, sessionData.data.txToken)
                 } else {
+                    
                     let modelClass = KyteModel<T>()
                     
                     guard let modelData = modelClass.jsonDecode(jsonString: str) else {
