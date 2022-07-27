@@ -88,16 +88,16 @@ public class KyteManager: ObservableObject {
         })
     }
     
-    public func post<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, parameters:[String:Any]?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func post<T:Codable>(_ modelDef: T.Type, model:String, parameters:[String:Any]?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .POST, model: model, parameters: parameters, headers: headers, completion:{ data, error in completion(data, error)} )
     }
-    public func update<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field: String?, value: String?, parameters:[String:Any]?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func update<T:Codable>(_ modelDef: T.Type, model:String, field: String?, value: String?, parameters:[String:Any]?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .PUT, model: model, field: field, value: value, parameters: parameters, headers: headers, completion:{ data, error in completion(data, error)} )
     }
-    public func get<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
-        self.request(T.self, method: .GET, model: model, field: nil, value: nil, headers: headers, completion:{ data, error in completion(data, error)} )
+    public func get<T:Codable>(_ modelDef: T.Type, model:String, field: String?, value: String?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+        self.request(T.self, method: .GET, model: model, field: field, value: value, headers: headers, completion:{ data, error in completion(data, error)} )
     }
-    public func delete<T:Codable>(_ modelDef: T.Type, method: KyteHTTPMethods, model:String, field: String?, value: String?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
+    public func delete<T:Codable>(_ modelDef: T.Type, model:String, field: String?, value: String?, headers:[String:String]? = nil, completion: @escaping  (_ data: KyteModelDefinition<T>?, _ error: KyteError?) -> Void) {
         self.request(T.self, method: .DELETE, model: model, field: field, value: value, headers: headers, completion:{ data, error in completion(data, error)} )
     }
     
