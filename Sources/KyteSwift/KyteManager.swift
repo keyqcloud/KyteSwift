@@ -123,4 +123,8 @@ public class KyteManager: ObservableObject {
     public func getUserId() -> String {
         return self.uid
     }
+    
+    public func isLoggedIn() -> Bool {
+        return self.sessionToken != "0" && self.transactionToken != "0"
+    }
 }
