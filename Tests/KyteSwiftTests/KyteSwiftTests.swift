@@ -34,6 +34,18 @@ final class KyteSwiftTests: XCTestCase {
         })
     }
     
+    func testPost() throws {
+        k.createSession(parameters: ["email":"info@keyqcloud.com","password":"2*pQ6`,p~~_e7"], headers: nil, completion: {
+            data, error in
+            
+            k.post(ExampleToDo.self, model: "ToDo", parameters: ["subject":"test todo","description":"test todo item"], completion: {
+                data, error in
+                XCTAssertNotNil(data)
+                XCTAssertNil(error)
+            })
+        })
+    }
+    
     func testPublicToDo() throws {
         k.get(ExampleToDo.self, model: "PublicToDo", field: nil, value: nil, completion: {
             data, error in
