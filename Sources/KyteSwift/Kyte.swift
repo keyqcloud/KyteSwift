@@ -17,34 +17,30 @@ public enum KyteHTTPMethods: String {
 
 public class Kyte<T>: ObservableObject where T : Codable {
 
-    static var endpoint:String {
-        return Bundle.main.object(forInfoDictionaryKey: "KyteEndpointUrl") as? String ?? ""
-    }
+    public var endpoint:String
+    public var publicKey:String
+    public var secretKey:String
+    public var accountNumber:String
+    public var identifier:String
     
-    // endpoint keys
-    static var publicKey:String {
-        return Bundle.main.object(forInfoDictionaryKey: "KytePublicKey") as? String ?? ""
-    }
-    static var secretKey:String {
-        return Bundle.main.object(forInfoDictionaryKey: "KyteSecretKey") as? String ?? ""
-    }
-    static var accountNumber:String {
-        return Bundle.main.object(forInfoDictionaryKey: "KyteAccountNumber") as? String ?? ""
-    }
-    static var identifier:String {
-        return Bundle.main.object(forInfoDictionaryKey: "KyteIdentifier") as? String ?? ""
-    }
+    public var sessionToken:String = "0"
+    public var transactionToken:String = "0"
+    private var timestamp:String = ""
+    private var epoch:String = ""
     
-    var sessionToken:String = "0"
-    var transactionToken:String = "0"
-    var timestamp:String = ""
-    var epoch:String = ""
+    init(withEndpoint endpoint:String, publickey:String, secretkey:String, accountnumber:String, identifier:String) {
+        self.endpoint = endpoint
+        self.publicKey = publickey
+        self.secretKey = secretkey
+        self.accountNumber = accountnumber
+        self.identifier = identifier
+    }
     
     func getIdentityString() -> String {
         // identity string
         // PUBLIC_KEY%SESSION_TOKEN%DATE_TIME_GMT%ACCOUNT_NUMBER
         // * url encode the base64 encoded string
-        let string = Kyte.publicKey + "%" + self.sessionToken + "%" + self.timestamp + "%" + Kyte.accountNumber
+        let string = self.publicKey + "%" + self.sessionToken + "%" + self.timestamp + "%" + self.accountNumber
         let utf8str = string.data(using: .utf8)
         if let base64str = utf8str?.base64EncodedString()
         {
@@ -67,13 +63,13 @@ public class Kyte<T>: ObservableObject where T : Codable {
         // #3 HMAC algo = SHA256, data = epoch, key = hash#2
         
         // calculate hash #1
-        let key1 = SymmetricKey(data: Kyte.secretKey.data(using: .utf8)!)
+        let key1 = SymmetricKey(data: self.secretKey.data(using: .utf8)!)
         let hash1 = HMAC<SHA256>.authenticationCode(for: Data(self.transactionToken.utf8), using: key1)
         //let hash1String = Data(hash1).map { String(format: "%02hhx", $0) }.joined()
         //print(hash1String)
         // calculate hash #2
         let key2 = SymmetricKey(data: hash1)
-        let hash2 = HMAC<SHA256>.authenticationCode(for: Data(Kyte.identifier.utf8), using: key2)
+        let hash2 = HMAC<SHA256>.authenticationCode(for: Data(self.identifier.utf8), using: key2)
         //let hash2String = Data(hash2).map { String(format: "%02hhx", $0) }.joined()
         //print(hash2String)
         // calculate hash #3
@@ -88,7 +84,7 @@ public class Kyte<T>: ObservableObject where T : Codable {
     // general request function
     public func makeRequest(httpMethod: KyteHTTPMethods, model: String, field: String? = nil, value: String? = nil, parameters:[String:Any]? = nil, headers:[String:String]? = nil, completion: @escaping  (_ data: Any?, _ error: KyteError?, _ sessionToken: String, _ txToken: String) -> Void) {
         
-        var endpointUrl = Kyte.endpoint + "/" + model
+        var endpointUrl = self.endpoint + "/" + model
         // generate endpointURL
         if (field != nil && value != nil) {
             endpointUrl += "/" + field! + "/" + value!

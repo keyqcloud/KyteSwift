@@ -39,8 +39,23 @@ open class KyteModel<T>: ObservableObject where T : Codable {
         do {
             self.data = try JSONDecoder().decode(KyteModelDefinition<T>.self, from: jsonString.data(using: .utf8)!)
             return self.data
+        } catch let DecodingError.dataCorrupted(context) {
+            print(context)
+            return nil
+        } catch let DecodingError.keyNotFound(key, context) {
+            print("Key '\(key)' not found:", context.debugDescription)
+            print("codingPath:", context.codingPath)
+            return nil
+        } catch let DecodingError.valueNotFound(value, context) {
+            print("Value '\(value)' not found:", context.debugDescription)
+            print("codingPath:", context.codingPath)
+            return nil
+        } catch let DecodingError.typeMismatch(type, context)  {
+            print("Type '\(type)' mismatch:", context.debugDescription)
+            print("codingPath:", context.codingPath)
+            return nil
         } catch {
-            print("Unable to parse JSON")
+            print("error: ", error)
             return nil
         }
     }
